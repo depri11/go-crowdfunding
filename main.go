@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/depri11/go-crowdfunding/auth"
+	"github.com/depri11/go-crowdfunding/campaign"
 	"github.com/depri11/go-crowdfunding/handler"
 	"github.com/depri11/go-crowdfunding/helper"
 	"github.com/depri11/go-crowdfunding/user"
@@ -24,6 +26,24 @@ func main() {
 	}
 
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
+
+	campaigns, err := campaignRepository.FindByUserID(14)
+
+	fmt.Println("debug")
+	fmt.Println("debug")
+	fmt.Println("debug")
+	fmt.Println(len(campaigns))
+	for _, campaign := range campaigns {
+		fmt.Println(campaign.Name)
+		if len(campaign.CampaignImages) > 0 {
+			fmt.Println("Jumlah gambar")
+			fmt.Println(len(campaign.CampaignImages))
+			fmt.Println(campaign.CampaignImages[0].FileName)
+
+		}
+	}
+
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 
@@ -65,7 +85,7 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 		}
 
 		claim, ok := token.Claims.(jwt.MapClaims)
-		
+
 		if !ok || !token.Valid{
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
