@@ -28,3 +28,7 @@ Content-Type: application/json
 ###########
 POST http://localhost:1000/api/v1/avatars
 Content-Type: application/json
+
+################################################################################
+GET http://localhost:1000/api/v1/campaigns?user_id=182
+Content-Type: application/json
