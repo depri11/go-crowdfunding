@@ -9,6 +9,7 @@ import (
 	"github.com/depri11/go-crowdfunding/campaign"
 	"github.com/depri11/go-crowdfunding/handler"
 	"github.com/depri11/go-crowdfunding/helper"
+	"github.com/depri11/go-crowdfunding/transaction"
 	"github.com/depri11/go-crowdfunding/user"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -26,13 +27,16 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	campaignRepository := campaign.NewRepository(db)
+	transactionRepository := transaction.NewRepository(db)
 
 	userService := user.NewService(userRepository)
 	campaignService := campaign.NewService(campaignRepository)
 	authService := auth.NewService()
+	transactionService := transaction.NewService(transactionRepository, campaignRepository)
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	router := gin.Default()
 	router.Static("/images", "./images")
@@ -48,6 +52,8 @@ func main() {
 	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)
 	api.PUT("campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign)
 	api.POST("/campaign-images", authMiddleware(authService, userService), campaignHandler.UploadImage)
+
+	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
 
 	router.Run(":1000")
 }
