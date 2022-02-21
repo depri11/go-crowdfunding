@@ -9,6 +9,7 @@ import (
 	"github.com/depri11/go-crowdfunding/campaign"
 	"github.com/depri11/go-crowdfunding/handler"
 	"github.com/depri11/go-crowdfunding/helper"
+	"github.com/depri11/go-crowdfunding/payment"
 	"github.com/depri11/go-crowdfunding/transaction"
 	"github.com/depri11/go-crowdfunding/user"
 	"github.com/dgrijalva/jwt-go"
@@ -32,7 +33,8 @@ func main() {
 	userService := user.NewService(userRepository)
 	campaignService := campaign.NewService(campaignRepository)
 	authService := auth.NewService()
-	transactionService := transaction.NewService(transactionRepository, campaignRepository)
+	paymentService := payment.NewService()
+	transactionService := transaction.NewService(transactionRepository, campaignRepository, paymentService)
 
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
@@ -55,6 +57,7 @@ func main() {
 
 	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
 	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransactions)
+	api.POST("/transactions", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
 
 	router.Run(":1000")
 }
