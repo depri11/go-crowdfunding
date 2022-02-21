@@ -13,7 +13,7 @@ POST http://localhost:1000/api/v1/sessions
 Content-Type: application/json
 
 {
-    "email": "devri@gmail.com",
+    "email": "rani@gmail.com",
     "password": "password"
 }
 
