@@ -14,8 +14,8 @@ type CreateTransactionInput struct {
 }
 
 type TransactionNotificationInput struct {
-	TransactionStatus string `json:"status"`
-	OrderID int `json:"order_id"`
-	PaymentType string `json:"payment_type"`
-	FraudStatus string `json:"fraud_status"`
+	TransactionStatus	string `json:"status"`
+	OrderID 			string `json:"order_id"`
+	PaymentType			string `json:"payment_type"`
+	FraudStatus			string `json:"fraud_status"`
 }
