@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/depri11/go-crowdfunding/helper"
+	"github.com/depri11/go-crowdfunding/payment"
 	"github.com/depri11/go-crowdfunding/transaction"
 	"github.com/depri11/go-crowdfunding/user"
 	"github.com/gin-gonic/gin"
@@ -17,10 +18,11 @@ import (
 
 type transactionHandler struct {
 	service transaction.Service
+	paymentService payment.Service
 }
 
-func NewTransactionHandler(service transaction.Service) *transactionHandler {
-	return &transactionHandler{service}
+func NewTransactionHandler(service transaction.Service, paymentService payment.Service) *transactionHandler {
+	return &transactionHandler{service, paymentService}
 }
 
 func (h *transactionHandler) GetCampaignTransaction(c *gin.Context) {
@@ -94,11 +96,32 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 
 	newTransaction, err := h.service.CreateTransaction(input)
 	if err != nil {
-		response := helper.APIResponse("Failed to create transaction", http.StatusUnprocessableEntity, "error", nil)
+		response := helper.APIResponse("Failed to create transaction", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	response := helper.APIResponse("Success create to transaction", http.StatusOK, "success", transaction.FormatTransaction(newTransaction))
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *transactionHandler) GetNotification(c *gin.Context) {
+	var input transaction.TransactionNotificationInput
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		response := helper.APIResponse("Failed to process notification", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	err = h.paymentService.ProcessPayment(input)
+	if err != nil {
+		response := helper.APIResponse("Failed to process notification", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, input)
 }
